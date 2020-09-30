@@ -1,71 +1,79 @@
-import React, { Fragment, useState } from 'react'
+import React, { useState } from 'react'
+import { Link } from 'react-router-dom'
 import axios from 'axios'
+import { toast } from 'react-toastify'
 
-const Register = () => {
-  const [inputs, setInputs] = useState({
-    email: 'pig',
-    password: '',
+const Register = ({ setAuth }) => {
+  const [formValues, setFormValues] = useState({
     name: '',
+    email: '',
+    password: '',
   })
 
-  const { email, password, name } = inputs
+  const { name, email, password } = formValues
 
   const onChange = (e) => {
-    setInputs({ ...inputs, [e.target.name]: e.target.value })
+    setFormValues({ ...formValues, [e.target.name]: e.target.value })
   }
 
-  const onSubmitForm = (e) => {
+  const onSubmitForm = async (e) => {
     e.preventDefault()
 
+    console.log(formValues)
     try {
-      // const response = await axios.post("http://localhost:5000/auth/register", inputs)
-      const body = { email, password, name }
+      const response = await axios.post(
+        `http://localhost:5000/auth/register`,
+        formValues
+      )
 
-      const response = await fetch("http://localhost:5000/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json"},
-        body: JSON.stringify(body)
-      })
-
-      const parseRes = await response.json()
-      
-      console.log(parseRes)
+      //console.log(response);
+      if (response.status === 201) {
+        // status: 201, statusText: "Created"
+        localStorage.setItem('token', response.data.token)
+        setAuth(true)
+        toast.success('Registered Successfully')
+      } else {
+        setAuth(false)
+        toast.error(response.data)
+      }
     } catch (err) {
-      console.error(err.message)
+      console.log(err.message) // 401
+      toast.error(err.message)
     }
   }
 
   return (
-    <Fragment>
-      <h1 className='text-center my-5'>Register</h1>
+    <>
+      <h1 className='mt-5 text-center'>Register</h1>
       <form onSubmit={onSubmitForm}>
         <input
-          type='email'
+          type='text'
           name='email'
           placeholder='email'
-          className='form-control my-3'
           value={email}
           onChange={(e) => onChange(e)}
+          className='form-control my-3'
         />
         <input
           type='password'
           name='password'
           placeholder='password'
-          className='form-control my-3'
           value={password}
           onChange={(e) => onChange(e)}
+          className='form-control my-3'
         />
         <input
           type='text'
           name='name'
           placeholder='name'
-          className='form-control my-3'
           value={name}
           onChange={(e) => onChange(e)}
+          className='form-control my-3'
         />
         <button className='btn btn-success btn-block'>Submit</button>
       </form>
-    </Fragment>
+      <Link to='/login'>login</Link>
+    </>
   )
 }
 

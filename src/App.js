@@ -5,19 +5,50 @@ import {
   Route,
   Redirect,
 } from 'react-router-dom'
+import axios from 'axios'
 import './App.css'
 
-//components
+// components
 import Dashboard from './components/Dashboard'
 import Login from './components/Login'
 import Register from './components/Register'
 
-function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+import { toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
-  const setAuth = (boolean) => {
-    setIsAuthenticated(boolean)
+toast.configure()
+
+const App = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState()
+
+  const setAuth = (isAuth) => {
+    setIsAuthenticated(isAuth)
   }
+
+  useEffect(() => {
+    const isAuth = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:5000/auth/is-verify`,
+          {
+            headers: {
+              token: localStorage.getItem('token'),
+            },
+          }
+        )
+
+        if (response.status === 200 && response.data) {
+          setIsAuthenticated(true)
+        } else {
+          setIsAuthenticated(false)
+        }
+      } catch (err) {
+        console.error(err.message)
+      }
+    }
+
+    isAuth()
+  }, [])
 
   return (
     <>
@@ -28,10 +59,10 @@ function App() {
               exact
               path='/login'
               render={(props) =>
-                !isAuthenticated ? (
-                  <Login {...props} setAuth={setAuth} />
+                isAuthenticated ? (
+                  <Redirect to='/dashboard' />
                 ) : (
-                  <Redirect to='/dasboard' />
+                  <Login {...props} setAuth={setAuth} />
                 )
               }
             />
@@ -39,10 +70,10 @@ function App() {
               exact
               path='/register'
               render={(props) =>
-                !isAuthenticated ? (
-                  <Register {...props} setAuth={setAuth} />
+                isAuthenticated ? (
+                  <Redirect to='/dashboard' />
                 ) : (
-                  <Redirect to='/login' />
+                  <Register {...props} setAuth={setAuth} />
                 )
               }
             />
