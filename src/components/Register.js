@@ -1,4 +1,5 @@
 import React, { Fragment, useState } from 'react'
+import axios from 'axios'
 
 const Register = () => {
   const [inputs, setInputs] = useState({
@@ -17,8 +18,18 @@ const Register = () => {
     e.preventDefault()
 
     try {
+      // const response = await axios.post("http://localhost:5000/auth/register", inputs)
+      const body = { email, password, name }
 
-      const response = await fetch("http:")
+      const response = await fetch("http://localhost:5000/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json"},
+        body: JSON.stringify(body)
+      })
+
+      const parseRes = await response.json()
+      
+      console.log(parseRes)
     } catch (err) {
       console.error(err.message)
     }
