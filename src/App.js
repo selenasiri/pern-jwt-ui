@@ -9,7 +9,7 @@ import axios from 'axios'
 import './App.css'
 
 // components
-import Dashboard from './components/Dashboard'
+import Dashboard from './components/dashboard/Dashboard'
 import Login from './components/Login'
 import Register from './components/Register'
 

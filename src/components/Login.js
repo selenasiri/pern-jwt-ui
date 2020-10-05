@@ -1,55 +1,56 @@
-import React, { useState } from 'react'
+import React, { Fragment, useState } from 'react'
 import { Link } from 'react-router-dom'
-import axios from 'axios'
+
 import { toast } from 'react-toastify'
 
 const Login = ({ setAuth }) => {
-  const [formValues, setFormValues] = useState({
+  const [inputs, setInputs] = useState({
     email: '',
     password: '',
   })
 
-  const { email, password } = formValues
+  const { email, password } = inputs
 
-  const onChange = (e) => {
-    setFormValues({ ...formValues, [e.target.name]: e.target.value })
-  }
+  const onChange = (e) =>
+    setInputs({ ...inputs, [e.target.name]: e.target.value })
 
   const onSubmitForm = async (e) => {
     e.preventDefault()
-
-    console.log(formValues)
     try {
-      const response = await axios.post(
-        `http://localhost:5000/auth/login`,
-        formValues
+      const body = { email, password }
+      const response = await fetch(
+        'http://localhost:5000/authentication/login',
+        {
+          method: 'POST',
+          headers: {
+            'Content-type': 'application/json',
+          },
+          body: JSON.stringify(body),
+        }
       )
 
-      console.log(response)
-      if (response.status === 200) {
-        // status: 200, statusText: "OK"
+      const parseRes = await response.json()
 
-        localStorage.setItem('token', response.data.token)
+      if (parseRes.jwtToken) {
+        localStorage.setItem('token', parseRes.jwtToken)
         setAuth(true)
         toast.success('Logged in Successfully')
       } else {
         setAuth(false)
-        toast.error(response.data)
+        toast.error(parseRes)
       }
     } catch (err) {
-      console.log(err.message) // 401
-      toast.error(err.message)
+      console.error(err.message)
     }
   }
 
   return (
-    <>
+    <Fragment>
       <h1 className='mt-5 text-center'>Login</h1>
       <form onSubmit={onSubmitForm}>
         <input
           type='text'
           name='email'
-          placeholder='email'
           value={email}
           onChange={(e) => onChange(e)}
           className='form-control my-3'
@@ -57,16 +58,14 @@ const Login = ({ setAuth }) => {
         <input
           type='password'
           name='password'
-          placeholder='password'
           value={password}
           onChange={(e) => onChange(e)}
           className='form-control my-3'
         />
-
         <button className='btn btn-success btn-block'>Submit</button>
       </form>
-      <Link to='/register'>Register</Link>
-    </>
+      <Link to='/register'>register</Link>
+    </Fragment>
   )
 }
 
